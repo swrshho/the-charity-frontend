@@ -30,7 +30,7 @@ export const HouseholdActionButton = ({
 }: Props) => {
   const [deleteHousehold] = useDeleteHouseholdMutation();
   const { id, name } = household!;
-  const t = messages.households.list.delete.modal;
+  const t = messages.notification.household.delete;
 
   const onDeleteHousehold = async () => {
     try {
@@ -38,16 +38,16 @@ export const HouseholdActionButton = ({
 
       if (isNull(data)) throw Error('Assert: data is null');
       showNotification({
-        title: t.notification.title,
-        message: t.notification.success(data.household.name),
+        title: t.title,
+        message: t.success(data.household!.name),
         type: 'success',
         ...createTestAttr(ids.notifications.delete.success),
       });
     } catch (err) {
       debug.error(err);
       showNotification({
-        title: t.notification.title,
-        message: t.notification.failed(name),
+        title: t.title,
+        message: t.failed(name),
         type: 'failure',
         ...createTestAttr(ids.notifications.delete.failure),
       });

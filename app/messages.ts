@@ -151,13 +151,13 @@ export const messages = {
     list: {
       title: 'لیست پروژه‌ها',
       table: {
-        columns: [
-          'ردیف',
-          'نام',
-          'توضیحات',
-          'تاریخ شروع - پایان',
-          'وضعیت اطلاعات',
-        ],
+        columns: {
+          order: 'ردیف',
+          name: 'نام',
+          description: 'توضیحات',
+          status: 'وضعیت اطلاعات',
+          fullDate: 'تاریخ شروع - پایان',
+        },
       },
     },
   },
