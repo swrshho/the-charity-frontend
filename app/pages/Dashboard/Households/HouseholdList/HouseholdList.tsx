@@ -6,19 +6,75 @@ import {
   showNotification,
   Table,
 } from '@camp/design';
+import { householdColumnHelper } from '@camp/domain';
 import { errorMessages, messages } from '@camp/messages';
+import { AppRoute } from '@camp/router';
 import { createTestAttr } from '@camp/test';
 import { isEmpty, isNull } from '@fullstacksjs/toolbox';
+import { Group } from '@mantine/core';
+import {
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
 
+import { InformationBadge, SeverityBadge } from '../../../../components';
 import { CreateHouseholdButton } from '../CreateHousehold';
+import {
+  HouseholdActionButton,
+  householdActionIds as actionIds,
+} from '../HouseholdActionButton';
 import { HouseholdEmptyState } from '../HouseholdEmptyState';
 import * as ids from './HouseholdList.ids';
+import { HouseholdTableColumn } from './HouseholdTableColumn';
 import { HouseholdTableRow } from './HouseholdTableRow';
 
+const t = messages.households.list;
+
 export const HouseholdList = () => {
-  const t = messages.households.list;
   const { data, loading, error } = useHouseholdListQuery();
   const households = data?.household;
+
+  const columns = [
+    householdColumnHelper.display({
+      header: t.table.columns.order,
+      cell: info => info.row.index + 1,
+    }),
+    householdColumnHelper.accessor('name', {
+      header: t.table.columns.name,
+      cell: info => info.getValue(),
+    }),
+    householdColumnHelper.accessor('isCompleted', {
+      header: t.table.columns.status,
+      cell: status => (
+        <InformationBadge
+          information={status.getValue() ? 'completed' : 'draft'}
+        />
+      ),
+    }),
+    householdColumnHelper.accessor('severity', {
+      header: t.table.columns.severity,
+      cell: props => (
+        <Group position="apart">
+          <SeverityBadge severity={props.getValue()} />
+          <HouseholdActionButton
+            to={AppRoute.householdDetail}
+            params={{ id: props.row.original.id }}
+            household={props.row.original}
+            menuButtonId={actionIds.actionButton}
+            menuId={actionIds.actionMenu}
+          />
+        </Group>
+      ),
+    }),
+  ];
+
+  const table = useReactTable({
+    data: households!,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
   if (error) {
     showNotification({
@@ -34,13 +90,9 @@ export const HouseholdList = () => {
   if (isNull(households)) return null;
   if (isEmpty(households)) return <HouseholdEmptyState />;
 
-  const rows = households.map((info, i) => (
-    <HouseholdTableRow
-      order={i + 1}
-      key={Object.values(info).join('-')}
-      household={info}
-    />
-  ));
+  const householdRow = <HouseholdTableRow rows={table} />;
+
+  const householdColumn = <HouseholdTableColumn col={table} />;
 
   return (
     <DashboardCard
@@ -49,8 +101,8 @@ export const HouseholdList = () => {
     >
       <Table
         id={ids.householdTableId}
-        columns={t.table.columns as unknown as string[]}
-        rows={rows}
+        columns={householdColumn}
+        rows={householdRow}
       />
     </DashboardCard>
   );

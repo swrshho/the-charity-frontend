@@ -1,4 +1,4 @@
-export const householdRowIds = {
+export const householdActionIds = {
   actionButton: 'household-table-menu-button',
   actionMenu: 'household-table-menu',
   notifications: {
