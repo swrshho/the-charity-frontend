@@ -6,7 +6,11 @@ import {
   showNotification,
   Table,
 } from '@camp/design';
-import { householdColumnHelper } from '@camp/domain';
+import {
+  ApiHouseholdOrderBy,
+  householdColumnHelper,
+  InputMaybe,
+} from '@camp/domain';
 import { errorMessages, messages } from '@camp/messages';
 import { AppRoute } from '@camp/router';
 import { createTestAttr } from '@camp/test';
@@ -18,7 +22,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 
 import { InformationBadge, SeverityBadge } from '../../../../components';
 import { CreateHouseholdButton } from '../CreateHousehold';
@@ -34,9 +38,11 @@ import { HouseholdTableRow } from './HouseholdTableRow';
 const t = messages.households.list;
 
 export const HouseholdList = () => {
-  const { data, loading, error } = useHouseholdListQuery();
-  const households = data?.household;
   const [sorting, setSorting] = useState<SortingState>([]);
+  const { data, loading, error } = useHouseholdListQuery({
+    variables: { orderBy: sorting },
+  });
+  const households = data?.household;
 
   const columns = [
     householdColumnHelper.display({
@@ -57,6 +63,7 @@ export const HouseholdList = () => {
     }),
     householdColumnHelper.accessor('severity', {
       header: t.table.columns.severity,
+      enableSorting: true,
       cell: props => (
         <Group position="apart">
           <SeverityBadge severity={props.getValue()} />
@@ -75,11 +82,9 @@ export const HouseholdList = () => {
   const table = useReactTable({
     data: households!,
     columns,
-    state: {
-      sorting,
-    },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    enableSorting: true,
     getSortedRowModel: getSortedRowModel(),
   });
 
